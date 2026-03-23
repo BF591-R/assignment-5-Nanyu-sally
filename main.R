@@ -296,8 +296,10 @@ make_ranked_log2fc <- function(labeled_results, id2gene_path) {
     dplyr::select(mgi_symbol, log2FoldChange) %>%
     dplyr::arrange(dplyr::desc(log2FoldChange))
   
-  rnk_list <- ranked_df$log2FoldChange
-  names(rnk_list) <- ranked_df$mgi_symbol
+  rnk_list <- stats::setNames(
+    as.numeric(ranked_df$log2FoldChange),
+    as.character(ranked_df$mgi_symbol)
+  )
   
   return(rnk_list)
 }
