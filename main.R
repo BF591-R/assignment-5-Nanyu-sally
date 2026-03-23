@@ -291,11 +291,17 @@ make_ranked_log2fc <- function(labeled_results, id2gene_path) {
   )
   
   ranked_df <- labeled_results %>%
-    dplyr::left_join(id2gene, by = c("genes" = "ensembl_gene_id")) %>%
+    # 1. Strip the version number (e.g., .2) from the Ensembl IDs to match the mapping file
+    dplyr::mutate(ensembl_base = stringr::str_remove(genes, "\\..*$")) %>%
+    # 2. Join using the new stripped ID column
+    dplyr::left_join(id2gene, by = c("ensembl_base" = "ensembl_gene_id")) %>%
+    # 3. Filter out NAs and empty strings
     dplyr::filter(!is.na(mgi_symbol), mgi_symbol != "", !is.na(log2FoldChange)) %>%
-    dplyr::select(mgi_symbol, log2FoldChange) %>%
-    dplyr::arrange(dplyr::desc(log2FoldChange))
-  
+    # 4. Sort by log2FoldChange descending
+    dplyr::arrange(dplyr::desc(log2FoldChange)) %>%
+    # 5. Remove duplicate gene symbols (keeps the one with the highest log2FC due to the arrange above)
+    dplyr::distinct(mgi_symbol, .keep_all = TRUE)
+
   rnk_list <- ranked_df$log2FoldChange
   names(rnk_list) <- ranked_df$mgi_symbol
   
