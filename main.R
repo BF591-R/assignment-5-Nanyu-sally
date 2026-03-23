@@ -302,6 +302,7 @@ make_ranked_log2fc <- function(labeled_results, id2gene_path) {
   rnk_list <- sort(rnk_list, decreasing = TRUE)
   
   return(rnk_list)
+  
 }
 
 #' Function to run fgsea with arguments for min and max gene set size
