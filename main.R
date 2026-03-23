@@ -292,12 +292,14 @@ make_ranked_log2fc <- function(labeled_results, id2gene_path) {
   
   merged_df <- labeled_results %>%
     dplyr::left_join(id2gene, by = c("genes" = "ensembl_gene_id")) %>%
-    dplyr::filter(!is.na(mgi_symbol), !is.na(log2FoldChange)) %>%
-    dplyr::distinct(mgi_symbol, .keep_all = TRUE) %>%
+    dplyr::filter(!is.na(mgi_symbol), mgi_symbol != "", !is.na(log2FoldChange)) %>%
     dplyr::arrange(dplyr::desc(log2FoldChange))
   
   rnk_list <- merged_df$log2FoldChange
   names(rnk_list) <- merged_df$mgi_symbol
+  
+  rnk_list <- rnk_list[!duplicated(names(rnk_list))]
+  rnk_list <- sort(rnk_list, decreasing = TRUE)
   
   return(rnk_list)
 }
